@@ -9,7 +9,7 @@ const Register = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const { registered, isLoading, error } = useAppSelector(
+  const { isAuthenticated, isLoading, error } = useAppSelector(
     (state) => state.user
   );
 
@@ -23,13 +23,13 @@ const Register = () => {
     if (error) {
       toast.error(error);
     }
-    if (registered && !successDisplayed) {
+    if (isAuthenticated && !successDisplayed) {
       // Check if success message has been displayed
       toast.success("You've successfully created an account");
       setSuccessDisplayed(true); // Update the state to indicate success message has been displayed
       navigate("/login");
     }
-  }, [error, navigate, registered, successDisplayed]);
+  }, [error, navigate, isAuthenticated, successDisplayed]);
 
   function submitRegister(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -38,6 +38,7 @@ const Register = () => {
       username,
       email,
       password,
+      avatar: null, 
     };
 
     dispatch(registerUser(userData));

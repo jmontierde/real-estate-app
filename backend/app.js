@@ -3,15 +3,23 @@ import user from "./routes/user.js";
 import auth from "./routes/auth.js";
 import post from "./routes/post.js";
 import test from "./routes/test.js";
+import property from "./routes/property.js";
+
 import cookieParser from "cookie-parser";
 import cors from "cors";
 const app = express();
 
-const port = 3000;
+const allowedOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
 
 app.use(
   cors({
-    origin: "http://127.0.0.1:5173",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, origin); // Dynamically set the correct origin
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
@@ -19,11 +27,12 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-app.use("/api/user", user);
 app.use("/api/auth", auth);
+app.use("/api/users", user);
+app.use("/api/property", property);
 app.use("/api/post", post);
 app.use("/api/test", test);
 
-app.listen(port, () => {
-  console.log(`Listening on port ${port}`);
+app.listen(process.env.PORT, () => {
+  console.log(`Listening on port ${process.env.PORT}`);
 });

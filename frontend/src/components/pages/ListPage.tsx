@@ -126,7 +126,7 @@ const ListPage = () => {
                 <img src={message} alt="message" className="w-6" />
               </div>
             </div>
-          </div> */}
+            </div> */}
         </div>
       </div>
     </div>
