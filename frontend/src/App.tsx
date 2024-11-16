@@ -4,6 +4,11 @@ import Layout from "./components/layout/Layout";
 import About from "./components/layout/About";
 import Register from "./features/user/Register";
 import Login from "./features/user/Login";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import Profile from "./features/user/Profile";
+
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const router = createBrowserRouter([
   {
@@ -30,10 +35,25 @@ const router = createBrowserRouter([
       },
     ],
   },
+  {
+    path: "/",
+    element: <ProtectedRoute />,
+    children: [
+      {
+        path: "/profile",
+        element: <Profile />,
+      },
+    ],
+  },
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <ToastContainer />
+      <RouterProvider router={router} />
+    </>
+  );
 }
 
 export default App;
