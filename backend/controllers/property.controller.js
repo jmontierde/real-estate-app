@@ -1,15 +1,35 @@
 import prisma from "../lib/prisma.js";
+import { v2 as cloudinary } from "cloudinary";
 
 export const newProperty = async (req, res) => {
   try {
-    const { address, propertyType, price, bedroom } = req.body;
+    const {
+      title,
+      description,
+      location,
+      propertyType,
+      price,
+      bedroom,
+      images,
+      status,
+    } = req.body;
+
+    const uploadProperty = await cloudinary.uploader.upload(images, {
+      folder: "real-estate",
+    });
+
+    console.log("uploadProperty", uploadProperty);
 
     const property = await prisma.property.create({
       data: {
-        address: address,
+        title: title,
+        description: description,
+        location: location,
         propertyType: propertyType,
         price: price,
         bedroom: bedroom,
+        images: uploadProperty.public_id,
+        status: status,
       },
     });
 
@@ -21,7 +41,16 @@ export const newProperty = async (req, res) => {
 
 export const getProperties = async (req, res) => {
   try {
-    const properties = await prisma.property.findMany();
+    const { address, propertyType, price, bedroom } = req.query;
+
+    let filter = {};
+
+    if (address) filter.addressF = address;
+    if (propertyType) filter.propertyType = propertyType;
+    if (price) filter.price = Number(price);
+    if (bedroom) filter.bedroom = Number(bedroom);
+
+    const properties = await prisma.property.findMany({ where: filter });
 
     res.status(200).json({ message: "Get all properties", properties });
   } catch (error) {
