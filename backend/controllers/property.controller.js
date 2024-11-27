@@ -10,42 +10,56 @@ export const newProperty = async (req, res) => {
       propertyType,
       price,
       bedroom,
-      images,
+      images, // Array of image paths or URLs
       status,
     } = req.body;
 
-    const uploadProperty = await cloudinary.uploader.upload(images, {
-      folder: "real-estate",
-    });
+    if (!Array.isArray(images) || images.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Images should be a non-empty array" });
+    }
 
-    console.log("uploadProperty", uploadProperty);
+    const uploadedImages = await Promise.all(
+      images.map(async (image) => {
+        const uploadResult = await cloudinary.uploader.upload(image, {
+          folder: "real-estate",
+        });
+        return uploadResult.url;
+      })
+    );
+
+    console.log("Uploaded Images:", uploadedImages);
 
     const property = await prisma.property.create({
       data: {
-        title: title,
-        description: description,
-        location: location,
-        propertyType: propertyType,
-        price: price,
-        bedroom: bedroom,
-        images: uploadProperty.public_id,
-        status: status,
+        title,
+        description,
+        location,
+        propertyType,
+        price,
+        bedroom,
+        images: uploadedImages,
+        status,
       },
     });
 
     res.status(200).json({ message: "Added Property Successfully", property });
   } catch (error) {
-    console.log(error);
+    console.error("Error adding property:", error);
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   }
 };
 
 export const getProperties = async (req, res) => {
   try {
-    const { address, propertyType, price, bedroom } = req.query;
+    const { location, propertyType, price, bedroom } = req.query;
 
     let filter = {};
 
-    if (address) filter.addressF = address;
+    if (location) filter.location = location;
     if (propertyType) filter.propertyType = propertyType;
     if (price) filter.price = Number(price);
     if (bedroom) filter.bedroom = Number(bedroom);
